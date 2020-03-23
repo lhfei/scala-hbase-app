@@ -13,11 +13,13 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-		<hadoop.version>2.8.5</hadoop.version><!-- 2.8.5 -->
+		<hadoop.version>3.1.1</hadoop.version>
 		<hbase.version>2.2.2</hbase.version>
 		<spark.version>2.4.2</spark.version>
-		<scala.version>2.12.3</scala.version>
-		<scala.binary.version>2.12</scala.binary.version>
+		<hive.version>3.1.0</hive.version>
+		<orc.version>1.6.2</orc.version>
+		<scala.version>2.11.12</scala.version>
+		<scala.binary.version>2.11</scala.binary.version>
 	</properties>
 
 	<dependencies>
@@ -39,6 +41,16 @@
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-client</artifactId>
 			<version>${hbase.version}</version>
+			<exclusions>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-common</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-auth</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.hbase</groupId>
@@ -49,6 +61,27 @@
 					<groupId>org.apache.hadoop</groupId>
 					<artifactId>hadoop-mapreduce-client-core</artifactId>
 		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-common</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-auth</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-annotations</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-hdfs</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-distcp</artifactId>
+		    	</exclusion>
+		    	
 		    </exclusions>
 		</dependency>		
 		<dependency>
@@ -61,6 +94,17 @@
 		<!-- Spark -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_${scala.binary.version}</artifactId>
+			<version>${spark.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_${scala.binary.version}</artifactId>
 			<version>${spark.version}</version>
 			<exclusions>
@@ -68,12 +112,37 @@
 					<groupId>org.apache.hadoop</groupId>
   					<artifactId>hadoop-client</artifactId>
 				</exclusion>
+				
+				<exclusion>
+					<groupId>org.apache.orc</groupId>
+					<artifactId>orc-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.orc</groupId>
+					<artifactId>orc-mapreduce</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.orc</groupId>
+					<artifactId>orc-shims</artifactId>
+				</exclusion>
+				
 			</exclusions>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.spark</groupId>
 		    <artifactId>spark-hive_${scala.binary.version}</artifactId>
 		    <version>${spark.version}</version>
+		    <exclusions>
+		    	<exclusion>
+		    		 <groupId>org.spark-project.hive</groupId>
+    				<artifactId>hive-exec</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		    		 <groupId>org.spark-project.hive</groupId>
+    				<artifactId>hive-metastore</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		    <scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -89,6 +158,52 @@
 			<artifactId>hadoop-client</artifactId>
 			<version>${hadoop.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hive</groupId>
+			<artifactId>hive-exec</artifactId>
+			<version>${hive.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.orc</groupId>
+					<artifactId>orc-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>joda-time</groupId>
+					<artifactId>joda-time</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.hive</groupId>
+		    <artifactId>hive-metastore</artifactId>
+		    <version>${hive.version}</version>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.apache.orc</groupId>
+					<artifactId>orc-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+			
+		<dependency>
+			<groupId>org.jodd</groupId>
+			<artifactId>jodd-core</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		
+		
+		<dependency>
+		    <groupId>org.apache.orc</groupId>
+		    <artifactId>orc-core</artifactId>
+		    <version>${orc.version}</version>
+		</dependency>
+				<dependency>
+		    <groupId>org.apache.orc</groupId>
+		    <artifactId>orc-mapreduce</artifactId>
+		    <version>${orc.version}</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -132,7 +247,7 @@
 					<archive>
 						<manifest>
 							<!-- <mainClass>cn.lhfei.hbase.client.HBaseClient</mainClass> -->
-							<mainClass>cn.lhfei.hbase.mapreduce.SampleUploader</mainClass>
+							<mainClass>cn.lhfei.hbase.mapreduce.SampleUploader3</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

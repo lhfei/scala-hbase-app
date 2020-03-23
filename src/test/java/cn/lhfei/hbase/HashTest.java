@@ -20,7 +20,9 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.stream.IntStream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.MD5Hash;
 import org.junit.Test;
@@ -91,6 +93,23 @@ public class HashTest {
 		}
 	}
 	
+	@Test
+	public void getDt() {
+		String[] names = {"account_detail_id", "member_id", "detail_create_date", "balance_type", "detail_amount", "out_trade_no", "trade_no", "source_id", "trade_desc", "detail_desc", "accountreqcode", "trade_type"};
+		String dt = "2019-01-31 07:25:21.333234";
+		String line = "24554180140,110046586003,2019-01-31 07:25:21.333234,OUT,250210.0,JDDORS_10000032292412_31,2019013120004100014831269970,201901313000493377313,POP-应收应付款 - (JDDORS_10000032292412_31)10000032292412@POP结算,转账,20190131022007912515489195219533,T_AGD";
+		String[] cls = line.split(",");
+		
+		if(cls.length == 11) {
+			cls[11] = "";
+		}
+		LOG.info("====={}", cls.length);
+		IntStream.range(0, cls.length).forEach(idx -> {
+			LOG.info("Column[{}-{}]: {}", idx, names[idx], cls[idx]);
+		});
+		
+		LOG.info(dt.substring(0, 10));
+	}
 	
 	public static byte[][] getHexSplits(String startKey, String endKey, int numRegions) {
 		byte[][] splits = new byte[numRegions - 1][];

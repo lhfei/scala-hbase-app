@@ -7,8 +7,13 @@
 > create hbase table
 
 ```shell
-hbase> crete_namespace 'benchmark'
+hbase> create_namespace 'benchmark'
 hbase> create 'benchmark:dmbout', 'f'
+```
+
+```shell
+hbase> create_namespace 'benchmark'
+hbase> create 'benchmark:paybill', 'b', 'd'
 ```
 
 
