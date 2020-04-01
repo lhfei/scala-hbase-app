@@ -16,14 +16,14 @@
 package cn.lhfei.hbase.mapreduce;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
@@ -36,7 +36,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.tools.ant.taskdefs.LoadFile;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
+import cn.lhfei.hbase.config.HBaseProperties;
 import cn.lhfei.hbase.util.HashRowKeyGenerator;
 
 /**
@@ -47,18 +51,11 @@ import cn.lhfei.hbase.util.HashRowKeyGenerator;
  * @created Dec 20, 2019
  */
 public class SampleUploader extends Configured implements Tool {
-//	private static Configuration config;
-	private static Connection conn;
-	private static TableName hTableName;
-
-	/*static {
-		config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", "172.23.226.122,172.23.226.209,172.23.227.70");
-		config.set("zookeeper.znode.parent", "/hbase-unsecure");
-	}*/
 	private static final String NAME = "SampleUploader";
-	private static final String FAMILY_NAME = "f";
-	private static final String[] COLUMN_NAMES = {"create_date", "merchant_no", "member_id", "account_name", "detail_create_date", "out_trade_no", "account_balance", "in_amount", "out_amount", "trade_desc", "bill_date", "ext_min", "order_seq_no"};
+	private Configuration conf;
+	private static HBaseProperties hbaseProperties;
+	/*private static final String FAMILY_NAME = "f";
+	private static final String[] COLUMN_NAMES = {"create_date", "merchant_no", "member_id", "account_name", "detail_create_date", "out_trade_no", "account_balance", "in_amount", "out_amount", "trade_desc", "bill_date", "ext_min", "order_seq_no"};*/
 	private static final HashRowKeyGenerator generator = new HashRowKeyGenerator();
 	
 	static class Uploader extends Mapper<LongWritable, Text, ImmutableBytesWritable, Put> {
@@ -86,9 +83,16 @@ public class SampleUploader extends Configured implements Tool {
 			// Create Put
 			Put put = new Put(rowKey);
 			
-			IntStream.range(0, COLUMN_NAMES.length).forEach(idx -> {
-				put.addColumn(FAMILY_NAME.getBytes(), Bytes.toBytes(COLUMN_NAMES[idx]), Bytes.toBytes(values[idx]));
+			hbaseProperties.getColumnsWithFamily().entrySet().forEach(entry -> {
+				String[] columns = entry.getValue().split(",");
+				IntStream.range(0, columns.length).forEach(idx -> {
+					put.addColumn(entry.getKey().getBytes(), Bytes.toBytes(columns[idx]), Bytes.toBytes(values[idx]));
+				});
 			});
+			
+			/*IntStream.range(0, COLUMN_NAMES.length).forEach(idx -> {
+				put.addColumn(FAMILY_NAME.getBytes(), Bytes.toBytes(COLUMN_NAMES[idx]), Bytes.toBytes(values[idx]));
+			});*/
 
 			// Uncomment below to disable WAL. This will improve performance but means
 			// you will experience data loss in the case of a RegionServer crash.
@@ -112,10 +116,7 @@ public class SampleUploader extends Configured implements Tool {
 	 */
 	public static Job configureJob(Configuration conf, String[] args) throws IOException {
 		Path inputPath = new Path(args[0]);
-		String tableName = args[1];
-		
-		conf.set("hbase.zookeeper.quorum", "172.23.226.122,172.23.226.209,172.23.227.70");
-		conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+		String tableName = hbaseProperties.getTableName();
 		
 		Job job = Job.getInstance(conf, NAME + "_" + tableName);
 		job.setJarByClass(Uploader.class);
@@ -141,11 +142,18 @@ public class SampleUploader extends Configured implements Tool {
 	public int run(String[] otherArgs) throws Exception {
 		if (otherArgs.length != 2) {
 			System.err.println("Wrong number of arguments: " + otherArgs.length);
-			System.err.println("Usage: " + NAME + " <input> <tablename>");
+			System.err.println("Usage: " + NAME + " <input> <yaml>");
 			return -1;
 		}
-		hTableName = TableName.valueOf(otherArgs[1]);
-		Job job = configureJob(getConf(), otherArgs);
+		Yaml yaml = new Yaml(new Constructor(HBaseProperties.class));
+		InputStream in = LoadFile.class.getClassLoader().getResourceAsStream(otherArgs[1]);
+		hbaseProperties = yaml.load(in);
+		
+		conf = getConf();
+		conf.set("hbase.zookeeper.quorum", hbaseProperties.getZookeeperQuorum());
+		conf.set("zookeeper.znode.parent", hbaseProperties.getZookeeperZnodeParent());		
+		
+		Job job = configureJob(conf, otherArgs);
 		return (job.waitForCompletion(true) ? 0 : 1);
 	}
 

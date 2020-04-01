@@ -68,8 +68,7 @@ public class SampleUploader3 extends Configured implements Tool {
 			// Each line is comma-delimited; row,family,qualifier,value
 			
 			System.out.format("ROWKEY = %s_%s_%s", row.getFieldValue("source_id").toString(), row.getFieldValue("detail_create_date").toString(), row.getFieldValue("member_id").toString());
-			byte[] rowKey = this.buildRowKey(row.getFieldValue("source_id").toString(),
-					row.getFieldValue("detail_create_date").toString(), row.getFieldValue("member_id").toString());
+			byte[] rowKey = this.buildRowKey(row.getFieldValue("source_id").toString(), row.getFieldValue("member_id").toString());
 			
 			// Extract each value
 
@@ -110,12 +109,9 @@ public class SampleUploader3 extends Configured implements Tool {
 			}
 		}
 		
-		private byte[] buildRowKey(String source_id, String detail_cretae_date, String member_id) {
+		private byte[] buildRowKey(String source_id, String member_id) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(source_id);
-			sb.append("_");
-			
-			sb.append(detail_cretae_date.substring(0, 10));
 			sb.append("_");
 			
 			sb.append(member_id);

@@ -20,6 +20,7 @@
 		<orc.version>1.6.2</orc.version>
 		<scala.version>2.11.12</scala.version>
 		<scala.binary.version>2.11</scala.binary.version>
+		<snakeyaml.version>1.26</snakeyaml.version>
 	</properties>
 
 	<dependencies>
@@ -192,7 +193,7 @@
 			<version>3.5.2</version>
 		</dependency>
 		
-		
+		<!-- ORC -->
 		<dependency>
 		    <groupId>org.apache.orc</groupId>
 		    <artifactId>orc-core</artifactId>
@@ -202,6 +203,13 @@
 		    <groupId>org.apache.orc</groupId>
 		    <artifactId>orc-mapreduce</artifactId>
 		    <version>${orc.version}</version>
+		</dependency>
+
+		<!-- YAML -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>${snakeyaml.version}</version>
 		</dependency>
 
 	</dependencies>

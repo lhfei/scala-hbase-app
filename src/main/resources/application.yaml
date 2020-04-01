@@ -1,0 +1,5 @@
+zookeeperQuorum: "192.168.45.181,192.168.45.182,192.168.45.183"
+zookeeperZnodeParent: "/hbase-unsecure"
+tableName: "benchmark:paybill"
+columnsWithFamily:
+  b: account_detail_id,member_id,detail_create_date,balance_type,detail_amount,out_trade_no,trade_no,source_id,trade_desc,detail_desc,accountreqcode,trade_type
