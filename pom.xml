@@ -20,7 +20,7 @@
 		<orc.version>1.6.2</orc.version>
 		<scala.version>2.11.12</scala.version>
 		<scala.binary.version>2.11</scala.binary.version>
-		<snakeyaml.version>1.26</snakeyaml.version>
+		<snakeyaml.version>1.32</snakeyaml.version>
 	</properties>
 
 	<dependencies>
